@@ -10,12 +10,14 @@
 		if(mysqli_connect_errno($con)){
 			echo "ERROR1";
 		}
-		echo "bbbb";
+		echo $con;
 		mysqli_query($con,"SET NAMES utf8"); //處理中文
 		mysqli_select_db($con,$db_name) or die("資料庫連結錯誤");
 		echo "cccc";
 		$row = mysqli_query($con,$sql);
 		mysqli_close($con);
 		print_r($row);
+		echo "ddd";
+		echo $row;
 
 ?>
