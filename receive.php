@@ -1,7 +1,6 @@
 <?php
 
-    		$spl = SELECT * FROM course;
-    
+    		$spl = "SELECT * FROM course";
     		$db_server = "localhost";
 		$db_name = "course_management_t";
 		$db_user = "root";
