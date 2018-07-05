@@ -1,17 +1,15 @@
 <?php
 	$json_str = file_get_contents('php://input'); //接收request的body
 	$json_obj = json_decode($json_str); //轉成json格式
-	echo "CC";
+	
 	$myfile = fopen("log.txt", "w+") or die("Unable to open file!"); //設定一個log.txt來印訊息
-	fwrite($myfile, "\xEF\xBB\xBF"."hello"); //在字串前面加上\xEF\xBB\xBF轉成utf8格式
+	//fwrite($myfile, "\xEF\xBB\xBF".$json_str); //在字串前面加上\xEF\xBB\xBF轉成utf8格式
 	
 	$sender_userid = $json_obj->events[0]->source->userId; //取得訊息發送者的id
 	$sender_txt = $json_obj->events[0]->message->text; //取得訊息內容
 	$sender_replyToken = $json_obj->events[0]->replyToken; //取得訊息的replyToken
 	$sender_type = $json_obj->events[0]->type; //取得訊息的type
 	
-	echo "CC".$sender_userid.$sender_txt.$myfile;
-
 	if($sender_type == "postback"){ //訊息的type為postback(選單)
 		$postback_data = $json_obj->events[0]->postback->data; //取得postback的data
 		if($postback_data == "applyCourse"){ //postback的data是applyCourse的話，產生申請課程的postback json檔
@@ -31,7 +29,7 @@
 			    )
 		);
 	}
-	//fwrite($myfile, "\xEF\xBB\xBF".json_encode($response)); //在字串前面加上\xEF\xBB\xBF轉成utf8格式
+	fwrite($myfile, "\xEF\xBB\xBF".json_encode($response)); //在字串前面加上\xEF\xBB\xBF轉成utf8格式
 	$header[] = "Content-Type: application/json";
 	//輸入line 的 Channel access token
 	$header[] = "Authorization: Bearer m6MPT8cTtAs+flzA0qnYSoTH+9yhHjlJNAwjpnLHD8+VUv08fEhMgMfwiDPYqpCkADPD1dW6RO8eA4WCRyEZ0TSJURNCniQ16jY/71L/RpRlbGZFUkQsximuFeBSqIyjY8QLG9hAMs+o/FaczDA9rgdB04t89/1O/w1cDnyilFU=";
@@ -42,9 +40,6 @@
 	curl_setopt($ch, CURLOPT_HTTPHEADER, $header);                                                                                                   
 	$result = curl_exec($ch);
 	curl_close($ch);
-	
-	
-	
   
 	function welcome(){
 		$json = '{
@@ -85,19 +80,20 @@
 		$result = sql_select_fetchALL($sql);
 		$course_name = "";
 		foreach($result as $a){
+			$applyCourseUri = "https://sporzfy.com/chtChatBot/ninoiii0507/applyCourse.html?course_id=".$a['id'];
 			$course_obj = array (
 				"title" => $a['course_name'],
 				"text" => $a['course_name'],
 				"actions" => array (
 					array (
-						"type" => "postback",
+						"type" => "uri",
 						"label" => "課程報名",
-						"data" => "apply=".$a['course_id']
+						"uri" => $applyCourseUri
 					),
 					array (
-						"type" => "postback",
+						"type" => "uri",
 						"label" => "課程介紹",
-						"data" => "intro=".$a['course_id']
+						"uri" => $a['course_url']
 					)
 				)
 		      	);
@@ -105,17 +101,14 @@
 		}
 		return $json;
 	}
-
-
-
 	function sql_select_fetchALL($sql)
-	{ 
+	{   
 		$db_server = "localhost";
-		$db_name = "dpcleader_course";
-		$db_user = "dpcleader_sup";
-		$db_passwd = "xxyoKcK?MhX}_Ut&L]";
+		$db_name = "course_management_t";
+		$db_user = "root";
+		$db_passwd = "fdd396906f5054060122311cf8b0eb2da0cfe7a437501152";
 		
-		$con=mysqli_connect($db_server, $db_user, $db_passwd) or die("資料庫登入錯誤".mysqli_connect_errno().mysqli_connect_error());
+		$con=mysqli_connect($db_server, $db_user, $db_passwd) or die("資料庫登入錯誤");
 		if(mysqli_connect_errno($con)){
 			echo "ERROR1";
 		}
@@ -124,7 +117,6 @@
 		
 		$row = mysqli_query($con,$sql);
 		mysqli_close($con);
-		echo "完成資料庫登入與連接！";
 		return $row;
 	}
 ?>
